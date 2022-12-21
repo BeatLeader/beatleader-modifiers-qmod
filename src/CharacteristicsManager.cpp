@@ -21,6 +21,14 @@
 #include "GlobalNamespace/PlayerData.hpp"
 #include "GlobalNamespace/CustomDifficultyBeatmapSet.hpp"
 #include "GlobalNamespace/BeatmapLevelData.hpp"
+
+#include "GlobalNamespace/StandardLevelScenesTransitionSetupDataSO.hpp"
+#include "GlobalNamespace/OverrideEnvironmentSettings.hpp"
+#include "GlobalNamespace/ColorScheme.hpp"
+#include "GlobalNamespace/GameplayModifiers.hpp"
+#include "GlobalNamespace/PlayerSpecificSettings.hpp"
+#include "GlobalNamespace/PracticeSettings.hpp"
+
 #include "BeatmapSaveDataVersion3/BeatmapSaveData.hpp"
 
 #include "beatsaber-hook/shared/utils/hooking.hpp"
@@ -45,7 +53,7 @@ namespace BeatLeaderModifiers {
     // Future NSGolova, make it array, I'm lazy, sorry
     static BeatmapCharacteristicSO* customCharacteristics;
 
-    
+    CustomCharacterisitic customCharacterisitic = CustomCharacterisitic::standard;
 
     static ArrayW<CustomDifficultyBeatmap*> CreateCustomDifficulties(
             ArrayW<IDifficultyBeatmap *> difficultyBeatmaps,
@@ -149,6 +157,32 @@ namespace BeatLeaderModifiers {
 
     }
 
+    MAKE_HOOK_MATCH(
+        TransitionSetupDataInit, 
+        &StandardLevelScenesTransitionSetupDataSO::Init, 
+        void, 
+        StandardLevelScenesTransitionSetupDataSO* self, 
+        ::StringW gameMode, 
+        ::GlobalNamespace::IDifficultyBeatmap* difficultyBeatmap, 
+        ::GlobalNamespace::IPreviewBeatmapLevel* previewBeatmapLevel, 
+        ::GlobalNamespace::OverrideEnvironmentSettings* overrideEnvironmentSettings, 
+        ::GlobalNamespace::ColorScheme* overrideColorScheme, 
+        ::GlobalNamespace::GameplayModifiers* gameplayModifiers, 
+        ::GlobalNamespace::PlayerSpecificSettings* playerSpecificSettings, 
+        ::GlobalNamespace::PracticeSettings* practiceSettings, 
+        ::StringW backButtonText, 
+        bool useTestNoteCutSoundEffects, 
+        bool startPaused) {
+
+            if (difficultyBeatmap->get_parentDifficultyBeatmapSet()->get_beatmapCharacteristic()->get_serializedName() == customCharacteristics->get_serializedName()) {
+                customCharacterisitic = CustomCharacterisitic::betterScoring;
+            } else {
+                customCharacterisitic = CustomCharacterisitic::standard;
+            }
+
+            TransitionSetupDataInit(self, gameMode, difficultyBeatmap, previewBeatmapLevel, overrideEnvironmentSettings, overrideColorScheme, gameplayModifiers, playerSpecificSettings, practiceSettings, backButtonText, useTestNoteCutSoundEffects, startPaused);
+    }
+
     void InstallCharacteristics() {
 
         customCharacteristics = ScriptableObject::CreateInstance<BeatmapCharacteristicSO *>();
@@ -165,6 +199,7 @@ namespace BeatLeaderModifiers {
         LoggerContextObject logger = getLogger().WithContext("load");
 
         INSTALL_HOOK(logger, SetContent);
+        INSTALL_HOOK(logger, TransitionSetupDataInit);
         INSTALL_HOOK(logger, GetBeatmapCharacteristicBySerializedName);
     }
 }

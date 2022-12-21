@@ -2,6 +2,7 @@
 #include "ModConfig.hpp"
 
 #include "include/CharacteristicsManager.hpp"
+#include "include/RthythmGameModifier.hpp"
 
 #include "config-utils/shared/config-utils.hpp"
 
@@ -50,6 +51,7 @@ extern "C" void setup(ModInfo& info) {
 MAKE_HOOK_MATCH(AppInitStart, &AppInit::Start, void,
     AppInit *self) {
      BeatLeaderModifiers::InstallCharacteristics();
+     BeatLeaderModifiers::InstallRthythmGame();
 
      AppInitStart(self);
 }
