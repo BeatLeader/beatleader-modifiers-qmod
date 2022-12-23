@@ -107,7 +107,27 @@ namespace BeatLeaderModifiers {
 
         BeatmapLevelData* levelData = reinterpret_cast<BeatmapLevelData*>(level->get_beatmapLevelData());
         levelData->difficultyBeatmapSets = difficultyBeatmapSets->i_IReadOnlyList_1_T();
-    }   
+    } 
+
+    // static void RemoveCustomCharacteristic(FilteredBeatmapLevel* level) {
+
+    //     auto difficultyBeatmapSets = ::System::Collections::Generic::List_1<IDifficultyBeatmapSet*>::New_ctor();
+    //     auto notOriginalBeatmapSets = il2cpp_utils::try_cast<::System::Collections::Generic::List_1<PreviewDifficultyBeatmapSet*>>(level->previewDifficultyBeatmapSets);
+
+    //     if (notOriginalBeatmapSets == nullopt) {
+    //         auto originalBeatmapSets = listToArrayW<PreviewDifficultyBeatmapSet*>(level->previewDifficultyBeatmapSets);
+    //         for (int i = 0; i < originalBeatmapSets.Length(); i++) {
+    //             PreviewDifficultyBeatmapSet* set = originalBeatmapSets[i];
+    //             if (set->get_beatmapCharacteristic()->get_serializedName() != customCharacteristics->get_serializedName()) {
+    //                 difficultyBeatmapSets->Add(reinterpret_cast<IDifficultyBeatmapSet*>(set));
+    //                 getLogger().info("15");
+    //             }
+    //         }
+
+    //         BeatmapLevelData* levelData = reinterpret_cast<BeatmapLevelData*>(level->beatmapLevelData);
+    //         levelData->difficultyBeatmapSets = difficultyBeatmapSets->i_IReadOnlyList_1_T();
+    //     }
+    // }    
 
     MAKE_HOOK_MATCH(
             SetContent, 
@@ -120,23 +140,46 @@ namespace BeatLeaderModifiers {
             PlayerData* playerData) {
                 getLogger().info("0");
 
-        bool alreadyInstalled = il2cpp_utils::try_cast<::System::Collections::Generic::List_1<IDifficultyBeatmapSet*>>(level->get_beatmapLevelData()->get_difficultyBeatmapSets()) != nullopt;
-
-        if (!alreadyInstalled) {
-            auto beatMapSets = listToArrayW<IDifficultyBeatmapSet*>(level->get_beatmapLevelData()->get_difficultyBeatmapSets());
-            for (int i = 0; i < beatMapSets.Length(); i++)
-            {
-                IDifficultyBeatmapSet* set = beatMapSets[i];
-                if (set->get_beatmapCharacteristic()->get_serializedName() == customCharacteristics->get_serializedName()) {
-                    alreadyInstalled = true;
-                    break;
+        bool inSolo = il2cpp_utils::try_cast<BeatmapLevelData>(level->get_beatmapLevelData()) != nullopt;
+        if (inSolo) {
+            bool alreadyInstalled = il2cpp_utils::try_cast<::System::Collections::Generic::List_1<IDifficultyBeatmapSet*>>(level->get_beatmapLevelData()->get_difficultyBeatmapSets()) != nullopt;
+            
+            if (!alreadyInstalled) {
+                auto beatMapSets = listToArrayW<IDifficultyBeatmapSet*>(level->get_beatmapLevelData()->get_difficultyBeatmapSets());
+                for (int i = 0; i < beatMapSets.Length(); i++)
+                {
+                    IDifficultyBeatmapSet* set = beatMapSets[i];
+                    if (set->get_beatmapCharacteristic()->get_serializedName() == customCharacteristics->get_serializedName()) {
+                        alreadyInstalled = true;
+                        break;
+                    }
                 }
             }
-        }
-        
-        IPreviewBeatmapLevel* levelData = reinterpret_cast<IPreviewBeatmapLevel*>(level);
-        if (levelData->get_levelID().starts_with("custom_level") && !alreadyInstalled) {
-            AddCustomCharacteristic(level);
+            
+            IPreviewBeatmapLevel* levelData = reinterpret_cast<IPreviewBeatmapLevel*>(level);
+            if (levelData->get_levelID().starts_with("custom_level") && !alreadyInstalled) {
+                AddCustomCharacteristic(level);
+            }
+
+            // auto characteristic = self->selectedDifficultyBeatmap->get_parentDifficultyBeatmapSet()->get_beatmapCharacteristic();
+            // if (characteristic->get_serializedName() == customCharacteristics->get_serializedName()) {
+            //     auto beatMapSets = listToArrayW<IDifficultyBeatmapSet*>(level->get_beatmapLevelData()->get_difficultyBeatmapSets());
+            //     for (int i = 0; i < beatMapSets.Length(); i++)
+            //     {
+            //         IDifficultyBeatmapSet* set = beatMapSets[i];
+            //         if (set->get_beatmapCharacteristic()->get_serializedName() == "Standard") {
+            //             auto beatMaps = listToArrayW<IDifficultyBeatmap*>(set->get_difficultyBeatmaps());
+            //             for (int j = 0; j < beatMaps.Length(); j++)
+            //             {
+            //                 IDifficultyBeatmap* beatmap = beatMaps[j];
+            //                 if (self->selectedDifficultyBeatmap->get_difficultyRank() == beatmap->get_difficultyRank()) {
+            //                     self->selectedDifficultyBeatmap = beatmap;
+            //                     break;
+            //                 }  
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         SetContent(self, level, defaultDifficulty, defaultBeatmapCharacteristic, playerData);

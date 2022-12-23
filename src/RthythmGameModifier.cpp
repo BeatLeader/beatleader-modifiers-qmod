@@ -51,7 +51,7 @@ namespace BeatLeaderModifiers {
     AudioTimeSyncController* audioTimeSyncController;
 
     float badTiming = 0.04;
-    float goodTiming = 0.04;
+    float goodTiming = 0.045;
 
     MAKE_HOOK_MATCH(
         NoteCut, 
@@ -94,18 +94,7 @@ namespace BeatLeaderModifiers {
         InterpolationUtils::CalculateClosestApproach(previousFrameData, currentFrameData, &newTime, &newDistance);
         float newTimeDeviation = derefCutInfo.noteData->time - newTime;
 
-        
-        getLogger().info("%f %f %f %f %f %f", 
-            currentNotePosition.x,
-            currentNotePosition.y, 
-            currentNotePosition.z, 
-            previousNoteMovementData.NotePosition.x, 
-            previousNoteMovementData.NotePosition.y,
-            previousNoteMovementData.NotePosition.z);
-
         float timingRating = Mathf::Clamp01((Mathf::Abs(newTimeDeviation) - goodTiming) / badTiming);
-
-        getLogger().info("%f %f %f", derefCutInfo.timeDeviation, newTimeDeviation, timingRating);
 
         *noteCutInfo = NoteCutInfo(
             derefCutInfo.noteData,
@@ -156,7 +145,7 @@ namespace BeatLeaderModifiers {
 
     MAKE_HOOK_MATCH(NoteControllerInit, &NoteController::Init, void, NoteController* self, NoteData* noteData, float worldRotation, Vector3 moveStartPos, Vector3 moveEndPos, Vector3 jumpEndPos, float moveDuration, float jumpDuration, float jumpGravity, float endRotation, float uniformScale, bool rotatesTowardsPlayer, bool useRandomRotation) {
         NoteControllerInit(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration, jumpGravity, endRotation, uniformScale, rotatesTowardsPlayer, useRandomRotation);
-        float colliderScale = 0.5;
+        float colliderScale = 0.58;
         auto gameNote = il2cpp_utils::try_cast<GameNoteController>(self);
         if (gameNote != std::nullopt) {
             auto bigCuttable = gameNote.value()->bigCuttableBySaberList;
