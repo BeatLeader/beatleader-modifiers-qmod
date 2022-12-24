@@ -51,7 +51,7 @@ namespace BeatLeaderModifiers {
     AudioTimeSyncController* audioTimeSyncController;
 
     float badTiming = 0.04;
-    float goodTiming = 0.045;
+    float goodTiming = 0.035;
 
     MAKE_HOOK_MATCH(
         NoteCut, 
@@ -109,8 +109,8 @@ namespace BeatLeaderModifiers {
             derefCutInfo.cutDirDeviation,
             derefCutInfo.cutPoint,
             derefCutInfo.cutNormal,
-            timingRating / 3,
             derefCutInfo.cutAngle,
+            timingRating / 3.0,
             derefCutInfo.worldRotation,
             derefCutInfo.inverseWorldRotation,
             derefCutInfo.noteRotation,
