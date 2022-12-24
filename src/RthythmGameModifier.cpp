@@ -1,6 +1,7 @@
 #include "include/RthythmGameModifier.hpp"
 #include "include/CharacteristicsManager.hpp"
 #include "include/InterpolationUtils.hpp"
+#include "include/ModConfig.hpp"
 
 #include "UnityEngine/Vector3.hpp"
 #include "UnityEngine/Transform.hpp"
@@ -60,7 +61,7 @@ namespace BeatLeaderModifiers {
         NoteController* self, 
         ByRef<NoteCutInfo> noteCutInfo) {
 
-        if (customCharacterisitic != CustomCharacterisitic::betterScoring || !noteMovementCache.contains(self)) { 
+        if (UploadDisabledByReplay() || customCharacterisitic != CustomCharacterisitic::betterScoring || !noteMovementCache.contains(self)) { 
             NoteCut(self, noteCutInfo);
             return;
         }
@@ -122,8 +123,7 @@ namespace BeatLeaderModifiers {
     }
 
     MAKE_HOOK_MATCH(CutScoreBufferRefreshScores, &CutScoreBuffer::RefreshScores, void, CutScoreBuffer* self) {
-        if (customCharacterisitic == CustomCharacterisitic::betterScoring) {
-            getLogger().info("%f", self->noteCutInfo.timeDeviation);
+        if (!UploadDisabledByReplay() && customCharacterisitic == CustomCharacterisitic::betterScoring) {
             float timingRating = 1 - Mathf::Clamp01((Mathf::Abs(self->noteCutInfo.timeDeviation) - goodTiming) / badTiming);
             self->saberSwingRatingCounter->afterCutRating = timingRating;
             self->saberSwingRatingCounter->beforeCutRating = timingRating;
@@ -145,6 +145,9 @@ namespace BeatLeaderModifiers {
 
     MAKE_HOOK_MATCH(NoteControllerInit, &NoteController::Init, void, NoteController* self, NoteData* noteData, float worldRotation, Vector3 moveStartPos, Vector3 moveEndPos, Vector3 jumpEndPos, float moveDuration, float jumpDuration, float jumpGravity, float endRotation, float uniformScale, bool rotatesTowardsPlayer, bool useRandomRotation) {
         NoteControllerInit(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration, jumpGravity, endRotation, uniformScale, rotatesTowardsPlayer, useRandomRotation);
+        if (UploadDisabledByReplay()) {
+            return;
+        }
         float colliderScale = 0.58;
         auto gameNote = il2cpp_utils::try_cast<GameNoteController>(self);
         if (gameNote != std::nullopt) {
@@ -174,7 +177,7 @@ namespace BeatLeaderModifiers {
         NoteController* self) {
             NoteControllerUpdate(self);
 
-            if (audioTimeSyncController && self->get_transform()) { 
+            if (!UploadDisabledByReplay() && audioTimeSyncController && self->get_transform()) { 
                 if (noteMovementCache2.contains(self)) {
                     noteMovementCache[self] = noteMovementCache2[self];
                 }

@@ -138,7 +138,6 @@ namespace BeatLeaderModifiers {
             BeatmapDifficulty defaultDifficulty, 
             BeatmapCharacteristicSO* defaultBeatmapCharacteristic, 
             PlayerData* playerData) {
-                getLogger().info("0");
 
         bool inSolo = il2cpp_utils::try_cast<BeatmapLevelData>(level->get_beatmapLevelData()) != nullopt;
         if (inSolo) {
