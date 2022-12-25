@@ -145,6 +145,7 @@ namespace BeatLeaderModifiers {
 
     MAKE_HOOK_MATCH(NoteControllerInit, &NoteController::Init, void, NoteController* self, NoteData* noteData, float worldRotation, Vector3 moveStartPos, Vector3 moveEndPos, Vector3 jumpEndPos, float moveDuration, float jumpDuration, float jumpGravity, float endRotation, float uniformScale, bool rotatesTowardsPlayer, bool useRandomRotation) {
         NoteControllerInit(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration, jumpGravity, endRotation, uniformScale, rotatesTowardsPlayer, useRandomRotation);
+        if (customCharacterisitic != CustomCharacterisitic::betterScoring) { return; }
         float colliderScale = 0.58;
         auto gameNote = il2cpp_utils::try_cast<GameNoteController>(self);
         if (gameNote != std::nullopt) {
